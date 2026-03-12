@@ -1,0 +1,12 @@
+.env
+__pycache__/
+.venv/
+.pytest_cache/
+state.json
+*.pyc
+.ruff_cache/
+.basedpyright/
+dist/
+build/
+*.egg-info/
+.DS_Store
