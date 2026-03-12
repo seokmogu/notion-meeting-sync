@@ -6,3 +6,5 @@
 - 2026-03-13: The actual slug cleanup regex is `[^\w\s-]`; keeping Unicode word chars preserves Korean titles while removing punctuation like `!!!`.
 - 2026-03-13: `subprocess.run` with `check=False` + manual `returncode` inspection gives cleaner error handling than catching `CalledProcessError` — allows returning structured `PublishResult` with stderr content.
 - 2026-03-13: Using `git -C <path>` flag avoids needing to `cwd=` into the repo, keeping all git commands uniform and testable via a single `_run_git()` method.
+- 2026-03-13: `SyncState.get_last_poll_time()` returns an ISO string, so the orchestrator needs an explicit `datetime.fromisoformat()` normalization step before passing `since` into `NotionPoller.poll_new_pages()`.
+- 2026-03-13: Retrying failed pushes works best by snapshotting failed page IDs before the main batch, then doing a separate full-page lookup for retry candidates so the same run does not double-count newly failed pages.

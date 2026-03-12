@@ -5,3 +5,5 @@
 - 2026-03-13: The fetcher loads toolkit objects lazily via `importlib`, preserving the runtime `NotionApiClient` integration while keeping strict type checks clean in the sync project.
 - 2026-03-13: Git publisher uses `subprocess` over `gitpython`/`pygit2` — zero added dependencies, simpler error handling, and the git CLI is always available on the target machine.
 - 2026-03-13: `pull --rebase` before push avoids merge commits and reduces conflict surface for concurrent writers to the same meetings directory.
+- 2026-03-13: The CLI resolves `NMS_NOTION_TOKEN` first and falls back to `NOTION_TOKEN`, so `sync`/`serve` work from either environment naming while `status` can still render state without a token.
+- 2026-03-13: `serve` runs a catch-up sync before starting uvicorn and logs startup sync failures instead of aborting the webhook process, keeping real-time ingestion available even when the initial poll fails.
