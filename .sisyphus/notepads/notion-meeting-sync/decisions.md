@@ -3,3 +3,5 @@
 - 2026-03-13: The webhook receiver schedules downstream sync work with FastAPI `BackgroundTasks` after signature verification and `SyncState.is_synced()` checks, keeping the request path small while still skipping duplicate page events.
 - 2026-03-13: Fetcher filenames keep the first non-empty category or `GENERAL`, because downstream docs need stable category-prefixed paths even when Notion metadata is partially empty.
 - 2026-03-13: The fetcher loads toolkit objects lazily via `importlib`, preserving the runtime `NotionApiClient` integration while keeping strict type checks clean in the sync project.
+- 2026-03-13: Git publisher uses `subprocess` over `gitpython`/`pygit2` — zero added dependencies, simpler error handling, and the git CLI is always available on the target machine.
+- 2026-03-13: `pull --rebase` before push avoids merge commits and reduces conflict surface for concurrent writers to the same meetings directory.

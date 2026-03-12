@@ -4,3 +4,5 @@
 - 2026-03-13: Filename slugs can preserve Korean safely by stripping only `[^^\w\s-]`, then collapsing whitespace to hyphens and trimming duplicate edge hyphens.
 - 2026-03-13: `retrieve_markdown()` can legitimately return `None`, so the fetcher needs a block-children fallback before handing content to the meeting-page converter.
 - 2026-03-13: The actual slug cleanup regex is `[^\w\s-]`; keeping Unicode word chars preserves Korean titles while removing punctuation like `!!!`.
+- 2026-03-13: `subprocess.run` with `check=False` + manual `returncode` inspection gives cleaner error handling than catching `CalledProcessError` — allows returning structured `PublishResult` with stderr content.
+- 2026-03-13: Using `git -C <path>` flag avoids needing to `cwd=` into the repo, keeping all git commands uniform and testable via a single `_run_git()` method.
