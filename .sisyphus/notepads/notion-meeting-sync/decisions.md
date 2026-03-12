@@ -1,2 +1,5 @@
 - 2026-03-13: `MeetingMetadata` accepts `date` as `str | date` and optional `synced_at`, so conversion stays easy to call from tests and higher-level sync code.
 - 2026-03-13: Missing or omitted transcript content is rendered as `트랜스크립트 생략`, and raw markdown without custom tags falls back to the Notes section.
+- 2026-03-13: The webhook receiver schedules downstream sync work with FastAPI `BackgroundTasks` after signature verification and `SyncState.is_synced()` checks, keeping the request path small while still skipping duplicate page events.
+- 2026-03-13: Fetcher filenames keep the first non-empty category or `GENERAL`, because downstream docs need stable category-prefixed paths even when Notion metadata is partially empty.
+- 2026-03-13: The fetcher loads toolkit objects lazily via `importlib`, preserving the runtime `NotionApiClient` integration while keeping strict type checks clean in the sync project.

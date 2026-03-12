@@ -1,2 +1,6 @@
 - 2026-03-13: Notion native markdown meeting pages can be normalized with regex-only extraction for `<summary>`, `<notes>`, and `<transcript>` while preserving inner markdown.
 - 2026-03-13: Cleaning `[^https://...]` references and trailing footnote definitions is enough to keep exported sections readable without an HTML parser.
+- 2026-03-13: `NotionApiClient.query_database()` already folds pagination across `has_more` and `next_cursor`, so the poller can focus on defensive property extraction into `PageInfo` and tolerate missing title/date/people fields.
+- 2026-03-13: Filename slugs can preserve Korean safely by stripping only `[^^\w\s-]`, then collapsing whitespace to hyphens and trimming duplicate edge hyphens.
+- 2026-03-13: `retrieve_markdown()` can legitimately return `None`, so the fetcher needs a block-children fallback before handing content to the meeting-page converter.
+- 2026-03-13: The actual slug cleanup regex is `[^\w\s-]`; keeping Unicode word chars preserves Korean titles while removing punctuation like `!!!`.
