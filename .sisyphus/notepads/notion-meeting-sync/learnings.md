@@ -8,3 +8,4 @@
 - 2026-03-13: Using `git -C <path>` flag avoids needing to `cwd=` into the repo, keeping all git commands uniform and testable via a single `_run_git()` method.
 - 2026-03-13: `SyncState.get_last_poll_time()` returns an ISO string, so the orchestrator needs an explicit `datetime.fromisoformat()` normalization step before passing `since` into `NotionPoller.poll_new_pages()`.
 - 2026-03-13: Retrying failed pushes works best by snapshotting failed page IDs before the main batch, then doing a separate full-page lookup for retry candidates so the same run does not double-count newly failed pages.
+- 2026-03-13: Webhook `PageInfo` payloads only carry `page_id` + timestamps, so `SyncOrchestrator.sync_page()` must re-query `NotionPoller.poll_new_pages(None)` and hydrate the matching page before conversion to avoid `GENERAL--untitled.md` outputs.

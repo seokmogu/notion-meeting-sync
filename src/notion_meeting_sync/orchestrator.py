@@ -24,15 +24,32 @@ class SyncOrchestrator:
             dry_run=settings.dry_run,
         )
 
+    def _fetch_page_properties(self, page_id: str) -> PageInfo | None:
+        pages = self.poller.poll_new_pages(since=None)
+        for page in pages:
+            if page.page_id == page_id:
+                return page
+
+        logger.warning("Page %s not found while fetching full properties", page_id)
+        return None
+
     def sync_page(self, page_info: PageInfo) -> bool:
         if self.state.is_synced(page_info.page_id):
             logger.info("Page %s already synced, skipping", page_info.page_id)
             return True
 
-        logger.info("Syncing page %s: %s", page_info.page_id, page_info.title)
+        sync_page_info = page_info
 
         try:
-            document = fetch_and_convert(page_info)
+            if not page_info.title.strip():
+                full_page_info = self._fetch_page_properties(page_info.page_id)
+                if full_page_info is None:
+                    raise ValueError(f"Unable to load full properties for page '{page_info.page_id}'")
+                sync_page_info = full_page_info
+
+            logger.info("Syncing page %s: %s", sync_page_info.page_id, sync_page_info.title)
+
+            document = fetch_and_convert(sync_page_info)
             logger.info("Converted page %s: %s", page_info.page_id, document.file_name)
 
             result = self.publisher.publish(
@@ -49,7 +66,7 @@ class SyncOrchestrator:
                     _serialize_failed_push(
                         error=error_message,
                         file_name=document.file_name,
-                        title=page_info.title,
+                        title=sync_page_info.title,
                     ),
                 )
                 return False
@@ -57,9 +74,9 @@ class SyncOrchestrator:
             self.state.mark_synced(
                 page_info.page_id,
                 {
-                    "title": page_info.title,
+                    "title": sync_page_info.title,
                     "file_path": str(result.file_path),
-                    "last_edited_time": page_info.last_edited_time,
+                    "last_edited_time": sync_page_info.last_edited_time,
                 },
             )
             self.state.clear_failed_push(page_info.page_id)
@@ -69,7 +86,7 @@ class SyncOrchestrator:
             logger.exception("Failed to sync page %s", page_info.page_id)
             self.state.add_failed_push(
                 page_info.page_id,
-                _serialize_failed_push(error=str(exc), title=page_info.title),
+                _serialize_failed_push(error=str(exc), title=sync_page_info.title),
             )
             return False
 
