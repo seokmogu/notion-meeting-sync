@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, call, patch
 from notion_meeting_sync.config import Settings
 from notion_meeting_sync.converter import MeetingMetadata
 from notion_meeting_sync.fetcher import MeetingDocument
+from notion_meeting_sync.orchestrator import SyncOrchestrator
 from notion_meeting_sync.poller import PageInfo
 from notion_meeting_sync.publisher import PublishResult
 
@@ -48,7 +49,7 @@ def build_document(file_name: str = "TA-2026-03-12-상품-프라이싱-논의-�
     )
 
 
-def create_orchestrator(tmp_path: Path):
+def create_orchestrator(tmp_path: Path) -> tuple[SyncOrchestrator, MagicMock, MagicMock, MagicMock]:
     settings = build_settings(tmp_path)
     state = MagicMock()
     poller = MagicMock()
@@ -142,7 +143,7 @@ def test_run_catchup_sync_collects_stats(tmp_path: Path) -> None:
     since = datetime(2026, 3, 13, 0, 0, tzinfo=UTC)
 
     state.get_last_poll_time.return_value = since.isoformat()
-    state.is_synced.side_effect = lambda page_id: page_id == "page-skipped"
+    state.is_synced.side_effect = lambda page_id: page_id == "page-skipped"  # type: ignore[arg-type]
     state.get_failed_pushes.return_value = []
     poller.poll_new_pages.return_value = [synced_page, skipped_page, failed_page]
     orchestrator.sync_page = MagicMock(side_effect=[True, False])

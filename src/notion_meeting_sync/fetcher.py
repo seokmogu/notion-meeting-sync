@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import importlib
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Protocol, cast
+from typing import Any, Protocol, cast
 
 from notion_meeting_sync.config import Settings
 from notion_meeting_sync.converter import MeetingMetadata, convert_meeting_page

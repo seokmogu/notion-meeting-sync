@@ -54,7 +54,7 @@ class SyncState:
                 "failed_pushes": [],
             }
 
-        with open(self.state_file, "r+", encoding="utf-8") as f:
+        with self.state_file.open("r+", encoding="utf-8") as f:
             fcntl.flock(f.fileno(), fcntl.LOCK_SH)  # Shared lock for reading
             try:
                 content = f.read()
@@ -80,7 +80,7 @@ class SyncState:
         if not self.state_file.exists():
             self.state_file.touch()
 
-        with open(self.state_file, "r+", encoding="utf-8") as f:
+        with self.state_file.open("r+", encoding="utf-8") as f:
             fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Exclusive lock for writing
             try:
                 f.seek(0)

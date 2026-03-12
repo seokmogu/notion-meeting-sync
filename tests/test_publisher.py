@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
-from notion_meeting_sync.publisher import GitPublisher, PublishResult
+from notion_meeting_sync.publisher import GitPublisher
 
 
 def _setup_temp_git_repo(tmp_path: Path) -> Path:
@@ -133,7 +133,7 @@ def test_publish_integration_with_real_git(tmp_path: Path) -> None:
     publisher = GitPublisher(repo_path=repo, meetings_dir="team/meetings", dry_run=False)
 
     # Override _run_git to skip pull and push (no remote), but run add and commit for real
-    original_run_git = publisher._run_git
+    original_run_git = publisher._run_git  # type: ignore[attr-defined]
 
     def selective_git(cmd: list[str]) -> subprocess.CompletedProcess[str]:
         if "pull" in cmd or "push" in cmd:

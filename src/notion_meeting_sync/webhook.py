@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-from typing import Any, Callable, cast
+from collections.abc import Callable
+from typing import Any, cast
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 import json
 import tempfile
+from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
 

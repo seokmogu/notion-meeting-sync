@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import importlib
 from dataclasses import dataclass
 from datetime import UTC, datetime
-import importlib
 from typing import Any, Protocol, cast
 
 from notion_meeting_sync.config import Settings

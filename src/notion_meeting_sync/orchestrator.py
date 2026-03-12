@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from datetime import datetime
 import json
 import logging
+from datetime import datetime
 
 from notion_meeting_sync.config import Settings
 from notion_meeting_sync.fetcher import fetch_and_convert
