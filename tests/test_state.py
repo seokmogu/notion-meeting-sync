@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 import json
 import tempfile
 from datetime import datetime
@@ -11,7 +12,7 @@ from notion_meeting_sync.state import SyncState
 
 
 @pytest.fixture
-def temp_state_file() -> Path:
+def temp_state_file() -> Iterator[Path]:
     """Create a temporary directory and return path to state file (not created yet)."""
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_path = Path(tmpdir) / "state.json"
@@ -99,8 +100,8 @@ class TestPageTracking:
         sync_state.mark_synced("page-123", metadata)
         after = datetime.now().isoformat()
 
-        state = SyncState(state_file=sync_state.state_file)
-        synced_at = state._load_state()["synced_pages"]["page-123"]["synced_at"]
+        payload = json.loads(sync_state.state_file.read_text(encoding="utf-8"))
+        synced_at = payload["synced_pages"]["page-123"]["synced_at"]
         assert before <= synced_at <= after
 
     def test_multiple_pages_can_be_synced(self, sync_state: SyncState) -> None:
