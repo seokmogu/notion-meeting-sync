@@ -1,0 +1,2 @@
+- 2026-03-13: Notion native markdown meeting pages can be normalized with regex-only extraction for `<summary>`, `<notes>`, and `<transcript>` while preserving inner markdown.
+- 2026-03-13: Cleaning `[^https://...]` references and trailing footnote definitions is enough to keep exported sections readable without an HTML parser.

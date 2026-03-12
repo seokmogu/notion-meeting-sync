@@ -1,0 +1,19 @@
+---
+title: "test"
+date: 2026-03-12
+category: [TA]
+attendees: []
+notion_page_id: "abc"
+synced_at: "2026-03-12T15:00:00Z"
+---
+
+# test
+
+## 요약 (Summary)
+
+## 회의 내용 (Notes)
+
+## 트랜스크립트 (Transcript)
+
+트랜스크립트 생략
+

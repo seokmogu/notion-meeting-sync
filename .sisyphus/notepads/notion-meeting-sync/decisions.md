@@ -1,0 +1,2 @@
+- 2026-03-13: `MeetingMetadata` accepts `date` as `str | date` and optional `synced_at`, so conversion stays easy to call from tests and higher-level sync code.
+- 2026-03-13: Missing or omitted transcript content is rendered as `트랜스크립트 생략`, and raw markdown without custom tags falls back to the Notes section.

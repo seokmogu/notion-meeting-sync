@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.11, pytest-7.4.4, pluggy-1.6.0 -- /Users/seokmogu/project/notion-meeting-sync/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/seokmogu/project/notion-meeting-sync
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-0.23.8
+asyncio: mode=Mode.AUTO
+collecting ... collected 7 items
+
+tests/test_converter.py::test_convert_meeting_page_generates_frontmatter PASSED [ 14%]
+tests/test_converter.py::test_convert_meeting_page_extracts_summary_section PASSED [ 28%]
+tests/test_converter.py::test_convert_meeting_page_extracts_notes_section PASSED [ 42%]
+tests/test_converter.py::test_convert_meeting_page_extracts_transcript_section PASSED [ 57%]
+tests/test_converter.py::test_convert_meeting_page_replaces_omitted_transcript_notice PASSED [ 71%]
+tests/test_converter.py::test_convert_meeting_page_handles_empty_summary PASSED [ 85%]
+tests/test_converter.py::test_convert_meeting_page_handles_plain_markdown_without_tags PASSED [100%]
+
+============================== 7 passed in 0.01s ===============================
