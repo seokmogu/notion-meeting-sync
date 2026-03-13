@@ -42,7 +42,7 @@ def fetch_and_convert(page_info: PageInfo) -> MeetingDocument:
 def generate_filename(page_info: PageInfo) -> str:
     category = _category_prefix(page_info.categories)
     title_slug = _slugify_title(page_info.title)
-    return f"{category}-{page_info.date}-{title_slug}.md"
+    return f"{page_info.date}-{category}-{title_slug}.md"
 
 
 def _create_client() -> MarkdownRetrievalClient:

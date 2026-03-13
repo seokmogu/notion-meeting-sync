@@ -61,19 +61,19 @@ class FakeClient:
 def test_generate_filename_with_category() -> None:
     file_name = generate_filename(build_page_info())
 
-    assert file_name == "TA-2026-03-12-상품-프라이싱-논의-미팅.md"
+    assert file_name == "2026-03-12-TA-상품-프라이싱-논의-미팅.md"
 
 
 def test_generate_filename_without_category() -> None:
     file_name = generate_filename(build_page_info(title="제목 없는 미팅", categories=[]))
 
-    assert file_name == "GENERAL-2026-03-12-제목-없는-미팅.md"
+    assert file_name == "2026-03-12-GENERAL-제목-없는-미팅.md"
 
 
 def test_generate_filename_removes_special_chars() -> None:
     file_name = generate_filename(build_page_info(title="미팅 제목!!!"))
 
-    assert file_name == "TA-2026-03-12-미팅-제목.md"
+    assert file_name == "2026-03-12-TA-미팅-제목.md"
 
 
 def test_fetch_and_convert_pipeline() -> None:
@@ -84,7 +84,7 @@ def test_fetch_and_convert_pipeline() -> None:
         document = fetch_and_convert(page_info)
 
     assert isinstance(document, MeetingDocument)
-    assert document.file_name == "TA-2026-03-12-상품-프라이싱-논의-미팅.md"
+    assert document.file_name == "2026-03-12-TA-상품-프라이싱-논의-미팅.md"
     assert document.metadata.title == page_info.title
     assert document.metadata.date == page_info.date
     assert document.metadata.categories == page_info.categories
@@ -107,7 +107,7 @@ def test_fetch_and_convert_fallback() -> None:
     ):
         document = fetch_and_convert(page_info)
 
-    assert document.file_name == "TA-2026-03-12-상품-프라이싱-논의-미팅.md"
+    assert document.file_name == "2026-03-12-TA-상품-프라이싱-논의-미팅.md"
     assert client.retrieve_calls == [page_info.page_id]
     assert client.fetch_calls == [page_info.page_id]
     to_markdown.assert_called_once_with([{"id": "block-1"}])
