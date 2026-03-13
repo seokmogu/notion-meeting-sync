@@ -30,6 +30,12 @@
     <string>YOUR_TOKEN_HERE</string>
     <key>NMS_WEBHOOK_SECRET</key>
     <string>YOUR_VERIFICATION_TOKEN_HERE</string>
+    <key>NMS_GIT_REPO_PATH</key>
+    <string>/Users/seokmogu/project/agentic-services-docs</string>
+    <key>NMS_NOTION_DATABASE_ID</key>
+    <string>2ef7d8322b04834aac8a8158796b0a9a</string>
+    <key>NO_SSL_VERIFY</key>
+    <string>1</string>
   </dict>
 </dict>
 </plist>

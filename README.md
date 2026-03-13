@@ -14,6 +14,12 @@ Automatically sync Notion meeting notes to GitLab repository.
 - Notion Integration with database access
 - Git repository for meeting notes
 
+## SSL/TLS Note
+
+This project requires `NO_SSL_VERIFY=1` in environments with corporate proxy or custom CA chains. Python's `httpx` uses the `certifi` CA bundle which may not include intermediate certificates present in the system trust store.
+
+This is the standard workaround used across all internal tools. The env var is already included in `.env.example`, `setup.sh`, and the launchd plist.
+
 ## Installation
 
 1. **Clone and setup**:
@@ -30,6 +36,7 @@ Automatically sync Notion meeting notes to GitLab repository.
    # NMS_NOTION_DATABASE_ID=your_database_id
    # NMS_WEBHOOK_SECRET=your_verification_token (from Notion webhook setup)
    # NMS_GIT_REPO_PATH=/path/to/agentic-services-docs
+   # NO_SSL_VERIFY=1  (required for corporate proxy environments)
    ```
 
 3. **Run setup script**:

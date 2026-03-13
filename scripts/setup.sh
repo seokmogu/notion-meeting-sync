@@ -1,10 +1,19 @@
 #!/bin/bash
 set -e
 
+# 0. Export SSL bypass (required for corporate proxy / custom CA chains)
+export NO_SSL_VERIFY=1
+
 # 1. Check .env file
 if [ ! -f .env ]; then
     echo "Error: .env file not found. Copy .env.example and fill in your tokens."
     exit 1
+fi
+
+# Ensure NO_SSL_VERIFY is in .env
+if ! grep -q "NO_SSL_VERIFY" .env; then
+    echo "NO_SSL_VERIFY=1" >> .env
+    echo "Added NO_SSL_VERIFY=1 to .env"
 fi
 
 # 2. Setup Tailscale Funnel

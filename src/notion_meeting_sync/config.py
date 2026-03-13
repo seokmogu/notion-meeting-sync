@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="NMS_", env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_prefix="NMS_", env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     notion_token: str
     notion_database_id: str = "2ef7d8322b04834aac8a8158796b0a9a"
