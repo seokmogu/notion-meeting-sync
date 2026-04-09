@@ -89,6 +89,38 @@ class GitPublisher:
 
         return PublishResult(success=True, file_path=file_path)
 
+    def publish_file(self, file_path: Path, commit_message: str) -> PublishResult:
+        """Commit and push a file that already exists on disk.
+
+        Args:
+            file_path: Absolute path to the file to commit.
+            commit_message: Git commit message.
+
+        Returns:
+            PublishResult with success status.
+        """
+        if self.dry_run:
+            logger.info("Dry-run mode — skipping git for %s", file_path)
+            return PublishResult(success=True, file_path=file_path)
+
+        relative_path = str(file_path.relative_to(self.repo_path))
+
+        steps = [
+            ("add", ["add", relative_path]),
+            ("commit", ["commit", "-m", commit_message]),
+            ("push", ["push"]),
+        ]
+
+        for step_name, args in steps:
+            result = self._run_git(args)
+            if result.returncode != 0:
+                error_msg = result.stderr.strip() or f"git {step_name} failed with exit code {result.returncode}"
+                logger.error("git %s failed: %s", step_name, error_msg)
+                return PublishResult(success=False, file_path=file_path, error=error_msg)
+            logger.info("git %s succeeded", step_name)
+
+        return PublishResult(success=True, file_path=file_path)
+
     def _run_git(self, cmd: list[str]) -> subprocess.CompletedProcess[str]:
         full_cmd = ["git", "-C", str(self.repo_path), *cmd]
         logger.debug("Running: %s", " ".join(full_cmd))

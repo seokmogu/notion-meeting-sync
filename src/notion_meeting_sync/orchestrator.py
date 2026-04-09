@@ -9,6 +9,7 @@ from notion_meeting_sync.fetcher import fetch_and_convert
 from notion_meeting_sync.poller import NotionPoller, PageInfo
 from notion_meeting_sync.publisher import GitPublisher
 from notion_meeting_sync.state import SyncState
+from notion_meeting_sync.visualizer import visualize_meeting
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +82,17 @@ class SyncOrchestrator:
             )
             self.state.clear_failed_push(page_info.page_id)
             logger.info("Successfully synced page %s", page_info.page_id)
+
+            if not self.settings.dry_run:
+                meeting_dir = result.file_path.parent
+                viz_result = visualize_meeting(meeting_dir)
+                if viz_result.success and viz_result.output_path:
+                    self.publisher.publish_file(
+                        viz_result.output_path,
+                        f"docs: add diagrams for {document.file_name}",
+                    )
+                elif not viz_result.success:
+                    logger.warning("Visualization failed for %s: %s", meeting_dir.name, viz_result.error)
             return True
         except Exception as exc:  # noqa: BLE001
             logger.exception("Failed to sync page %s", page_info.page_id)
