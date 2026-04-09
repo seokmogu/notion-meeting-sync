@@ -26,12 +26,12 @@ def test_publish_creates_file(tmp_path: Path) -> None:
     publisher = GitPublisher(repo_path=repo, meetings_dir="team/meetings", dry_run=True)
 
     result = publisher.publish(
-        file_name="2026-03-12-standup.md",
+        file_name="2026-03-12-standup",
         content="# Standup\n\nContent here.",
         commit_message="feat: add standup notes",
     )
 
-    expected_path = repo / "team" / "meetings" / "2026-03-12-standup.md"
+    expected_path = repo / "team" / "meetings" / "2026-03-12-standup" / "index.md"
     assert result.success is True
     assert result.file_path == expected_path
     assert expected_path.exists()
@@ -46,20 +46,19 @@ def test_publish_commits_to_git(tmp_path: Path) -> None:
         mock_git.return_value = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
 
         result = publisher.publish(
-            file_name="2026-03-12-standup.md",
+            file_name="2026-03-12-standup",
             content="# Standup",
             commit_message="feat: add standup notes",
         )
 
     assert result.success is True
 
-    # Verify git commands were called in order: pull, add, commit, push
+    # Verify git commands were called in order: stash, pull, stash pop, add, commit, push
     calls = [c.args[0] for c in mock_git.call_args_list]
-    assert len(calls) == 4
-    assert "pull" in calls[0]
-    assert "add" in calls[1]
-    assert "commit" in calls[2]
-    assert "push" in calls[3]
+    assert "pull" in calls[1]
+    assert "add" in calls[3]
+    assert "commit" in calls[4]
+    assert "push" in calls[5]
 
 
 def test_publish_dry_run_skips_git(tmp_path: Path) -> None:
@@ -68,15 +67,15 @@ def test_publish_dry_run_skips_git(tmp_path: Path) -> None:
 
     with patch.object(publisher, "_run_git") as mock_git:
         result = publisher.publish(
-            file_name="2026-03-12-standup.md",
+            file_name="2026-03-12-standup",
             content="# Standup",
             commit_message="feat: add standup notes",
         )
 
     assert result.success is True
     assert result.error is None
-    # File should exist
-    assert (repo / "team" / "meetings" / "2026-03-12-standup.md").exists()
+    # File should exist in folder structure
+    assert (repo / "team" / "meetings" / "2026-03-12-standup" / "index.md").exists()
     # No git commands should have been called
     mock_git.assert_not_called()
 
@@ -92,7 +91,7 @@ def test_publish_handles_push_failure(tmp_path: Path) -> None:
 
     with patch.object(publisher, "_run_git", side_effect=fake_git):
         result = publisher.publish(
-            file_name="2026-03-12-standup.md",
+            file_name="2026-03-12-standup",
             content="# Standup",
             commit_message="feat: add standup notes",
         )
@@ -101,7 +100,7 @@ def test_publish_handles_push_failure(tmp_path: Path) -> None:
     assert result.error is not None
     assert "Permission denied" in result.error
     # File should still exist on disk
-    assert (repo / "team" / "meetings" / "2026-03-12-standup.md").exists()
+    assert (repo / "team" / "meetings" / "2026-03-12-standup" / "index.md").exists()
 
 
 def test_publish_pulls_before_push(tmp_path: Path) -> None:
@@ -111,7 +110,7 @@ def test_publish_pulls_before_push(tmp_path: Path) -> None:
     call_order: list[str] = []
 
     def tracking_git(cmd: list[str]) -> subprocess.CompletedProcess[str]:
-        for op in ("pull", "add", "commit", "push"):
+        for op in ("stash", "pull", "add", "commit", "push"):
             if op in cmd:
                 call_order.append(op)
                 break
@@ -119,12 +118,12 @@ def test_publish_pulls_before_push(tmp_path: Path) -> None:
 
     with patch.object(publisher, "_run_git", side_effect=tracking_git):
         publisher.publish(
-            file_name="2026-03-12-standup.md",
+            file_name="2026-03-12-standup",
             content="# Standup",
             commit_message="feat: add standup notes",
         )
 
-    assert call_order == ["pull", "add", "commit", "push"]
+    assert call_order == ["stash", "pull", "stash", "add", "commit", "push"]
 
 
 def test_publish_integration_with_real_git(tmp_path: Path) -> None:
@@ -132,25 +131,25 @@ def test_publish_integration_with_real_git(tmp_path: Path) -> None:
     repo = _setup_temp_git_repo(tmp_path)
     publisher = GitPublisher(repo_path=repo, meetings_dir="team/meetings", dry_run=False)
 
-    # Override _run_git to skip pull and push (no remote), but run add and commit for real
+    # Override _run_git to skip pull/push/stash (no remote), but run add and commit for real
     original_run_git = publisher._run_git  # type: ignore[attr-defined]
 
     def selective_git(cmd: list[str]) -> subprocess.CompletedProcess[str]:
-        if "pull" in cmd or "push" in cmd:
+        if "pull" in cmd or "push" in cmd or "stash" in cmd:
             return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="", stderr="")
         return original_run_git(cmd)
 
     with patch.object(publisher, "_run_git", side_effect=selective_git):
         result = publisher.publish(
-            file_name="2026-03-12-standup.md",
+            file_name="2026-03-12-standup",
             content="# Standup\n\nIntegration test.",
             commit_message="feat: add standup notes",
         )
 
     assert result.success is True
 
-    # Verify file exists
-    file_path = repo / "team" / "meetings" / "2026-03-12-standup.md"
+    # Verify file exists in folder structure
+    file_path = repo / "team" / "meetings" / "2026-03-12-standup" / "index.md"
     assert file_path.exists()
 
     # Verify git log has our commit

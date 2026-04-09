@@ -113,6 +113,70 @@ def test_ignore_non_page_created_events(tmp_path: Path) -> None:
     assert synced_page_ids == []
 
 
+def test_verification_token_accepted(tmp_path: Path) -> None:
+    settings = build_settings(tmp_path)
+    state = SyncState(settings.state_file)
+    app = create_app(settings=settings, state=state)
+    client = TestClient(app)
+
+    body = json.dumps({"verification_token": "secret_abc123"}).encode("utf-8")
+    response = client.post("/webhook/notion", content=body)
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
+def test_hmac_skipped_when_secret_empty(tmp_path: Path) -> None:
+    settings = Settings(
+        notion_token="test-token",
+        notion_database_id="database-123",
+        webhook_secret="",
+        git_repo_path=tmp_path / "repo",
+        state_file=tmp_path / "state.json",
+    )
+    state = SyncState(settings.state_file)
+    synced_page_ids: list[str] = []
+
+    def sync_page(page_info: PageInfo) -> None:
+        synced_page_ids.append(page_info.page_id)
+
+    app = create_app(settings=settings, state=state, sync_page=sync_page)
+    client = TestClient(app)
+    payload = build_event()
+    body = json.dumps(payload).encode("utf-8")
+
+    response = client.post("/webhook/notion", content=body)
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "accepted"
+    assert synced_page_ids == ["page-123"]
+
+
+def test_wrong_database_ignored(tmp_path: Path) -> None:
+    settings = build_settings(tmp_path)
+    state = SyncState(settings.state_file)
+    synced_page_ids: list[str] = []
+
+    def sync_page(page_info: PageInfo) -> None:
+        synced_page_ids.append(page_info.page_id)
+
+    app = create_app(settings=settings, state=state, sync_page=sync_page)
+    client = TestClient(app)
+    payload = build_event()
+    payload["data"] = {"parent": {"id": "wrong-database-id", "type": "database"}}
+    body = json.dumps(payload).encode("utf-8")
+
+    response = client.post(
+        "/webhook/notion",
+        content=body,
+        headers={"X-Notion-Signature": build_signature(body, settings.webhook_secret)},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ignored", "reason": "wrong_database"}
+    assert synced_page_ids == []
+
+
 def test_idempotency_skip_synced_pages(tmp_path: Path) -> None:
     settings = build_settings(tmp_path)
     state = SyncState(settings.state_file)
@@ -120,7 +184,7 @@ def test_idempotency_skip_synced_pages(tmp_path: Path) -> None:
         "page-123",
         {
             "title": "Existing page",
-            "file_path": "team/meetings/existing-page.md",
+            "file_path": "team/meetings/existing-page/index.md",
             "last_edited_time": "2026-03-13T12:34:56.789Z",
         },
     )

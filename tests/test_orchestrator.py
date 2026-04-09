@@ -35,7 +35,7 @@ def build_page_info(page_id: str = "page-123", title: str = "상품 프라이싱
     )
 
 
-def build_document(file_name: str = "TA-2026-03-12-상품-프라이싱-논의-미팅.md") -> MeetingDocument:
+def build_document(file_name: str = "TA-2026-03-12-상품-프라이싱-논의-미팅") -> MeetingDocument:
     return MeetingDocument(
         markdown_content="# Meeting\n\nContent",
         file_name=file_name,

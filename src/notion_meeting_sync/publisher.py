@@ -32,30 +32,48 @@ class GitPublisher:
         self.dry_run = dry_run
 
     def publish(self, file_name: str, content: str, commit_message: str) -> PublishResult:
-        """Write a markdown file and commit/push it to the git repository.
+        """Write a markdown file into a per-meeting folder and commit/push.
+
+        Each meeting gets its own directory so that attachments can be placed
+        alongside the notes.  The directory name equals *file_name* (which no
+        longer carries a ``.md`` suffix) and the notes are stored as
+        ``index.md`` inside that directory.
 
         Args:
-            file_name: Name of the file (e.g. "2026-03-12-standup.md").
+            file_name: Directory name for the meeting (e.g. "2026-03-12-GENERAL-standup").
             content: Markdown content to write.
             commit_message: Git commit message.
 
         Returns:
             PublishResult with success status and file path.
         """
-        file_path = self.repo_path / self.meetings_dir / file_name
-
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_path.write_text(content, encoding="utf-8")
-        logger.info("Wrote file: %s", file_path)
+        meeting_dir = self.repo_path / self.meetings_dir / file_name
+        file_path = meeting_dir / "index.md"
 
         if self.dry_run:
+            meeting_dir.mkdir(parents=True, exist_ok=True)
+            file_path.write_text(content, encoding="utf-8")
+            logger.info("Wrote file: %s", file_path)
             logger.info("Dry-run mode — skipping git operations")
             return PublishResult(success=True, file_path=file_path)
 
-        relative_path = f"{self.meetings_dir}/{file_name}"
+        relative_path = f"{self.meetings_dir}/{file_name}/index.md"
 
-        steps: list[tuple[str, list[str]]] = [
-            ("pull", ["pull", "--rebase"]),
+        self._run_git(["stash"])
+        pull_result = self._run_git(["pull", "--rebase"])
+        self._run_git(["stash", "pop"])
+
+        if pull_result.returncode != 0:
+            error_msg = pull_result.stderr.strip() or "git pull failed"
+            logger.error("git pull failed: %s", error_msg)
+            return PublishResult(success=False, file_path=file_path, error=error_msg)
+        logger.info("git pull succeeded")
+
+        meeting_dir.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(content, encoding="utf-8")
+        logger.info("Wrote file: %s", file_path)
+
+        steps = [
             ("add", ["add", relative_path]),
             ("commit", ["commit", "-m", commit_message]),
             ("push", ["push"]),
